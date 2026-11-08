@@ -7,199 +7,255 @@
 <title>BLACK STORE — Магазин техніки</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+:root {
+  --bg:#090a0d;
+  --panel:#15171c;
+  --text:#f5f5f6;
+  --muted:#9297a1;
+  --accent:#dc956b;
+  --border:rgba(255,255,255,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 15% 10%,rgba(180,85,42,.13),transparent 35%),
+    radial-gradient(ellipse at 85% 45%,rgba(120,65,40,.09),transparent 35%),
+    var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input,textarea{font:inherit}
+button{
+  border:1px solid rgba(220,149,107,.3);
+  background:#272421;color:#fff;
+  padding:12px 17px;border-radius:13px;
+  cursor:pointer;font-weight:600;
+  transition:.25s;
+}
+button:hover{background:#393027;border-color:var(--accent);transform:translateY(-2px)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.secondary{background:#202126;border-color:var(--border);color:#ddd}
+header{
+  position:sticky;top:0;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:15px;flex-wrap:wrap;padding:17px 5%;
+  background:rgba(12,13,16,.88);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--accent)}
+.search{
+  flex:1;max-width:520px;padding:14px 18px;
+  color:white;background:#1b1d22;
+  border:1px solid var(--border);border-radius:13px;outline:none;
+}
+.search:focus{border-color:var(--accent)}
+nav{
+  display:flex;gap:9px;flex-wrap:wrap;
+  padding:15px 5%;border-bottom:1px solid var(--border);
+}
+nav button{
+  background:#191a1e;border:1px solid var(--border);
+  border-radius:30px;color:#bbb;padding:9px 17px;
+}
+nav button.active{background:rgba(220,149,107,.14);color:#f1b28b;border-color:var(--accent)}
+.hero{
+  margin:30px 5%;padding:55px 40px;border-radius:24px;
+  background:linear-gradient(110deg,#1c1c20,#171411);
+  border:1px solid var(--border);position:relative;overflow:hidden;
+}
+.hero:after{
+  content:"";position:absolute;width:300px;height:300px;
+  right:-100px;top:-150px;border-radius:50%;
+  border:1px solid rgba(220,149,107,.2);
+  box-shadow:0 0 80px rgba(220,149,107,.1);
+  animation:orbit 14s linear infinite;
+}
+.hero h1{
+  font-size:clamp(30px,5vw,48px);
+  background:linear-gradient(90deg,#fff,#e6a77f);
+  color:transparent;background-clip:text;
+  margin-bottom:12px;position:relative;z-index:1;
+}
+.hero p{color:var(--muted);margin-bottom:22px;position:relative;z-index:1}
+.hero button{position:relative;z-index:2}
+@keyframes orbit{to{transform:rotate(360deg)}}
 
 /* CATEGORY SHOWCASE */
-
-.category-showcase {
-  position: relative;
-  min-height: 185px;
-  margin: 15px 5% 25px;
-  padding: 28px 35px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 25px;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 23px;
-  background: linear-gradient(110deg, #191a1e, #111216);
-  transition: background .4s, border-color .4s;
+.category-showcase{
+  margin:20px 5%;padding:28px 35px;min-height:185px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;overflow:hidden;position:relative;
+  border:1px solid var(--border);border-radius:23px;
+  background:linear-gradient(110deg,#1b1c20,#111216);
+  animation:bannerIn .55s ease both;
 }
-
-.showcase-content {
-  position: relative;
-  z-index: 2;
+@keyframes bannerIn{
+  from{opacity:0;transform:translateY(15px)}
+  to{opacity:1;transform:translateY(0)}
 }
-
-.showcase-content small {
-  color: #e5a174;
-  letter-spacing: 3px;
-  font-size: 10px;
-  font-weight: bold;
+.showcase-content{position:relative;z-index:2}
+.showcase-content small{color:var(--accent);letter-spacing:3px;font-size:10px;font-weight:bold}
+.showcase-content h2{font-size:clamp(24px,4vw,36px);margin:8px 0}
+.showcase-content p{color:var(--muted);font-size:14px}
+.showcase-visual{
+  width:150px;height:130px;flex-shrink:0;
+  display:grid;place-items:center;position:relative;
 }
-
-.showcase-content h2 {
-  color: white;
-  font-size: clamp(24px, 4vw, 36px);
-  margin: 8px 0;
+.showcase-visual:before,.showcase-visual:after{
+  content:"";position:absolute;width:115px;height:115px;
+  border:1px solid rgba(220,149,107,.24);border-radius:50%;
+  animation:orbit 9s linear infinite;
 }
-
-.showcase-content p {
-  color: #999da5;
-  font-size: 14px;
+.showcase-visual:after{width:145px;height:145px;opacity:.5;animation-direction:reverse}
+.showcase-icon{
+  position:relative;z-index:1;font-size:75px;
+  filter:drop-shadow(0 0 20px rgba(220,149,107,.35));
+  animation:float 3s ease-in-out infinite;
 }
+@keyframes float{50%{transform:translateY(-12px)}}
+.type-laptop .showcase-icon{animation:laptop 3s ease-in-out infinite}
+.type-phone .showcase-icon{animation:phone 3s ease-in-out infinite}
+.type-audio .showcase-icon{animation:pulse 1.7s ease-in-out infinite}
+.type-monitor .showcase-icon{animation:float 2.5s ease-in-out infinite}
+@keyframes laptop{50%{transform:perspective(300px) rotateY(18deg) translateY(-8px)}}
+@keyframes phone{50%{transform:rotate(12deg) translateY(-8px)}}
+@keyframes pulse{50%{transform:scale(1.15);filter:drop-shadow(0 0 30px rgba(220,149,107,.6))}}
 
-.showcase-visual {
-  position: relative;
-  width: 150px;
-  height: 130px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
+#notice{padding:10px 5%;color:#e2a77f;font-size:14px}
+main{padding:25px 5% 65px}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:23px}
+.heading h2{font-size:25px}
+#resultCount{color:var(--muted);font-size:13px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.card{
+  overflow:hidden;border:1px solid var(--border);border-radius:19px;
+  background:linear-gradient(145deg,#1b1d22,#121317);
+  transition:transform .3s,border-color .3s,box-shadow .3s;
+  animation:cardIn .45s ease both;
 }
-
-.showcase-visual::before,
-.showcase-visual::after {
-  content: "";
-  position: absolute;
-  width: 115px;
-  height: 115px;
-  border: 1px solid rgba(229,138,80,.22);
-  border-radius: 50%;
-  animation: showcaseOrbit 9s linear infinite;
+@keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{transform:translateY(-6px);border-color:rgba(220,149,107,.4);box-shadow:0 15px 40px #0008}
+.photo{height:205px;display:flex;align-items:center;justify-content:center;background:#101115;border-bottom:1px solid var(--border);overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:contain;padding:13px;transition:transform .4s}
+.card:hover .photo img{transform:scale(1.06)}
+.info{padding:17px}
+.category{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px}
+.info h3{font-size:15px;line-height:1.45;min-height:44px;margin-bottom:13px}
+.price{font-size:21px;font-weight:bold;margin-bottom:12px}
+.stock{font-size:12px;color:var(--muted);margin-bottom:14px}
+.actions{display:flex;gap:8px}
+.actions button{flex:1;padding:11px 8px;font-size:13px}
+.actions button:first-child{color:#f1b28b}
+.panel{
+  position:fixed;z-index:40;top:0;right:0;width:min(430px,100%);
+  height:100%;padding:24px;overflow:auto;
+  background:rgba(17,18,22,.97);backdrop-filter:blur(25px);
+  border-left:1px solid var(--border);box-shadow:-15px 0 55px #0008;
+  transform:translateX(110%);transition:transform .35s;
 }
-
-.showcase-visual::after {
-  width: 145px;
-  height: 145px;
-  border-color: rgba(229,138,80,.10);
-  animation-direction: reverse;
+.panel.open{transform:translateX(0)}
+.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.cartitem{display:flex;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid var(--border)}
+.total{font-size:23px;font-weight:bold;color:var(--accent);margin:25px 0}
+.overlay{
+  display:none;position:fixed;inset:0;z-index:50;padding:15px;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(9px);
 }
-
-.showcase-icon {
-  position: relative;
-  z-index: 1;
-  font-size: 76px;
-  filter: drop-shadow(0 0 22px rgba(229,138,80,.25));
-  animation: showcaseFloat 3s ease-in-out infinite;
+.dialog{
+  width:min(460px,100%);max-height:90vh;overflow:auto;padding:27px;
+  background:#191a1f;border:1px solid var(--border);border-radius:21px;
+  box-shadow:0 25px 80px #0009;animation:bannerIn .25s ease;
 }
-
-.category-showcase.type-phone .showcase-icon {
-  animation: phoneMove 3s ease-in-out infinite;
+.dialog h2{margin-bottom:16px}
+.dialog input,.dialog textarea{
+  width:100%;padding:14px;margin:7px 0;
+  background:#24252b;border:1px solid var(--border);
+  border-radius:11px;color:white;outline:none;
 }
-
-.category-showcase.type-laptop .showcase-icon {
-  animation: laptopMove 3.5s ease-in-out infinite;
+.dialog input:focus,.dialog textarea:focus{border-color:var(--accent)}
+.dialog button{margin-top:9px}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+footer{padding:32px 20px;text-align:center;border-top:1px solid var(--border);color:#777;font-size:13px}
+@media(max-width:600px){
+  header{padding:14px 4%;gap:11px}
+  .logo{font-size:23px}
+  .search{order:3;width:100%;max-width:none}
+  nav{padding:13px 4%}
+  .hero{margin:20px 4%;padding:38px 23px}
+  .category-showcase{margin:12px 4%;padding:22px 17px;min-height:150px}
+  .showcase-visual{width:95px;height:105px}
+  .showcase-icon{font-size:52px}
+  .showcase-visual:before{width:85px;height:85px}
+  .showcase-visual:after{width:105px;height:105px}
+  main{padding:20px 4% 45px}
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .photo{height:145px}
+  .info{padding:12px}
+  .info h3{font-size:13px;min-height:48px}
+  .price{font-size:18px}
+  .actions{flex-direction:column}
 }
-
-.category-showcase.type-audio .showcase-icon {
-  animation: audioPulse 1.7s ease-in-out infinite;
-}
-
-.category-showcase.type-monitor .showcase-icon {
-  animation: monitorMove 3s ease-in-out infinite;
-}
-
-.category-showcase.type-tablet .showcase-icon {
-  animation: phoneMove 4s ease-in-out infinite;
-}
-
-@keyframes showcaseFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes phoneMove {
-  0%, 100% { transform: rotate(-8deg) translateY(0); }
-  50% { transform: rotate(8deg) translateY(-8px); }
-}
-
-@keyframes laptopMove {
-  0%, 100% { transform: perspective(300px) rotateY(-12deg); }
-  50% { transform: perspective(300px) rotateY(12deg) translateY(-8px); }
-}
-
-@keyframes audioPulse {
-  0%, 100% { transform: scale(.94); filter: drop-shadow(0 0 10px rgba(229,138,80,.2)); }
-  50% { transform: scale(1.12); filter: drop-shadow(0 0 28px rgba(229,138,80,.5)); }
-}
-
-@keyframes monitorMove {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-7px) scale(1.06); }
-}
-
-@keyframes showcaseOrbit {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@media(max-width:600px) {
-  .category-showcase {
-    margin: 12px 4% 20px;
-    padding: 23px 18px;
-    min-height: 155px;
-  }
-
-  .showcase-visual {
-    width: 95px;
-    height: 110px;
-  }
-
-  .showcase-icon {
-    font-size: 53px;
-  }
-
-  .showcase-visual::before {
-    width: 85px;
-    height: 85px;
-  }
-
-  .showcase-visual::after {
-    width: 105px;
-    height: 105px;
-  }
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
 </style>
 </head>
 <body>
-
 <header>
  <div class="logo">BLACK<span>STORE</span></div>
  <input class="search" id="search" placeholder="Пошук товарів..." oninput="render()">
  <button onclick="toggleCart()">🛒 Кошик (<span id="count">0</span>)</button>
  <button class="secondary" id="accountBtn" onclick="openAuth()">Увійти</button>
 </header>
-<nav id="categories">
- <button class="active" onclick="setCategory('Усі')">Усі товари</button>
-</nav>
+<nav id="categories"><button class="active">Усі товари</button></nav>
+
 <section class="hero">
  <h1>ТЕХНІКА. ЯКІСТЬ. СТИЛЬ.</h1>
  <p>Обирай сучасну техніку в BLACK STORE</p>
  <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">До каталогу →</button>
 </section>
+
 <div id="notice"></div>
+
+<section class="category-showcase" id="categoryShowcase">
+ <div class="showcase-content">
+  <small>BLACK STORE COLLECTION</small>
+  <h2 id="showcaseTitle">Технології майбутнього</h2>
+  <p id="showcaseDescription">Обирай найкращу техніку для себе</p>
+ </div>
+ <div class="showcase-visual"><div class="showcase-icon" id="showcaseIcon">⚡</div></div>
+</section>
+
 <main id="catalog">
  <div class="heading"><h2>Каталог товарів</h2><span id="resultCount"></span></div>
  <div class="products" id="products">Завантажуємо товари...</div>
 </main>
+
 <div class="panel" id="cartPanel">
  <div class="panelhead"><h2>Ваш кошик</h2><button onclick="toggleCart()">✕</button></div>
  <div id="cartItems"></div>
  <div class="total" id="total">Разом: 0 ₴</div>
  <button style="width:100%" onclick="checkout()">Оформити замовлення</button>
 </div>
+
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeDialog()">
  <div class="dialog" id="dialog"></div>
 </div>
 <footer>© 2026 BLACK STORE · Інтернет-магазин техніки</footer>
 
 <script>
-/* ВСТАВ СЮДИ СВОЇ ДВА ЗНАЧЕННЯ З SUPABASE */
 const SUPABASE_URL = "https://khpbevlmqypfqkniedcu.supabase.co";
-const SUPABASE_KEY = "sb_publishable_MxvX0vg45TxzAqPJrmIWSA_8qpcbUxi";
+const SUPABASE_KEY = "https://khpbevlmqypfqkniedcu.supabase.co/rest/v1/
 
+
+sb_publishable_MxvX0vg45TxzAqPJrmIWSA_8qpcbUxi";
 const db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 let products=[],cart=JSON.parse(localStorage.getItem("bs_cart")||"[]");
 let selected="Усі",currentUser=null;
 
@@ -217,7 +273,9 @@ async function loadProducts(){
   .eq("is_active",true).order("id");
  if(error){message("Не вдалося завантажити товари: "+error.message);return}
  products=data||[];
- renderCategories();render();
+ renderCategories();
+ updateCategoryShowcase();
+ render();
 }
 
 function renderCategories(){
@@ -226,7 +284,45 @@ function renderCategories(){
  `<button class="${selected===c?"active":""}" onclick="setCategory('${esc(c)}')">${esc(c==="Усі"?"Усі товари":c)}</button>`
  ).join("");
 }
-function setCategory(c){selected=c;renderCategories();render()}
+
+function setCategory(c){
+ selected=c;
+ renderCategories();
+ updateCategoryShowcase();
+ render();
+}
+
+function updateCategoryShowcase(){
+ const banner=document.getElementById("categoryShowcase");
+ const title=document.getElementById("showcaseTitle");
+ const description=document.getElementById("showcaseDescription");
+ const icon=document.getElementById("showcaseIcon");
+ const c=selected.toLowerCase();
+
+ let d={type:"",icon:"⚡",title:"Технології майбутнього",description:"Обирай найкращу техніку для себе"};
+
+ if(c.includes("ноут")||c.includes("laptop"))
+ d={type:"type-laptop",icon:"💻",title:"Потужність без меж",description:"Ноутбуки для роботи, навчання та ігор"};
+ else if(c.includes("смартфон")||c.includes("телефон")||c.includes("phone"))
+ d={type:"type-phone",icon:"📱",title:"Технології у твоїх руках",description:"Смартфони, що змінюють щоденність"};
+ else if(c.includes("навуш")||c.includes("науш")||c.includes("audio"))
+ d={type:"type-audio",icon:"🎧",title:"Відчуй кожен звук",description:"Твоя музика. Твій ритм. Твій простір"};
+ else if(c.includes("монітор")||c.includes("монитор")||c.includes("monitor"))
+ d={type:"type-monitor",icon:"🖥️",title:"Побач більше",description:"Монітори для роботи та розваг"};
+ else if(c.includes("планшет")||c.includes("tablet"))
+ d={type:"type-phone",icon:"📲",title:"Свобода великих можливостей",description:"Планшети для будь-яких завдань"};
+ else if(c.includes("аксесуар")||c.includes("аксессуар"))
+ d={type:"",icon:"⌚",title:"Деталі мають значення",description:"Аксесуари, що доповнюють твій стиль"};
+
+ banner.className="category-showcase "+d.type;
+ title.textContent=d.title;
+ description.textContent=d.description;
+ icon.textContent=d.icon;
+ icon.style.animation="none";
+ void icon.offsetWidth;
+ icon.style.animation="";
+}
+
 function render(){
  const q=document.getElementById("search").value.toLowerCase();
  const list=products.filter(p=>(selected==="Усі"||p.category===selected)&&p.name.toLowerCase().includes(q));
@@ -299,7 +395,7 @@ async function signUp(){
  const {data,error}=await db.auth.signUp({email,password});
  document.getElementById("authMessage").textContent=error?error.message:
  "Реєстрація успішна. Якщо підтвердження email увімкнено, перевірте пошту.";
- if(data.user&&!data.session) return;
+ if(data.user&&!data.session)return;
  if(data.user){currentUser=data.user;closeDialog();updateAccount()}
 }
 async function logout(){await db.auth.signOut();currentUser=null;updateAccount();message("Ви вийшли з акаунта")}
