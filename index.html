@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACK STORE — Інтернет-магазин</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#101010;color:#fff}
+header{background:#181818;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid #292929}
+.logo{font-size:27px;font-weight:900}.logo span{color:#ff6a00}
+.search{flex:1;max-width:550px;padding:13px 17px;border:1px solid #444;border-radius:8px;background:#252525;color:white;font-size:15px}
+button{cursor:pointer;border:0;border-radius:7px;background:#ff6a00;color:white;padding:12px 18px;font-weight:bold}
+button:hover{background:#e65f00}
+nav{padding:15px 5%;background:#202020;display:flex;gap:12px;flex-wrap:wrap}
+nav button{background:#303030}
+nav button.active{background:#ff6a00}
+.hero{margin:25px 5%;padding:45px 35px;border-radius:13px;background:linear-gradient(110deg,#242424,#111);border:1px solid #333}
+.hero h1{font-size:38px;margin-bottom:12px}.hero p{color:#bbb;margin-bottom:22px}
+main{padding:15px 5% 50px}
+.heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:15px;flex-wrap:wrap}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.card{background:#1c1c1c;border:1px solid #303030;border-radius:11px;overflow:hidden;transition:.2s}
+.card:hover{transform:translateY(-4px);border-color:#ff6a00}
+.photo{height:190px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo img{width:100%;height:100%;object-fit:contain}
+.info{padding:16px}
+.category{font-size:12px;color:#ff8a38;margin-bottom:9px}
+.info h3{font-size:16px;line-height:1.4;min-height:45px;margin-bottom:12px}
+.price{font-size:21px;font-weight:bold;margin-bottom:14px}
+.old{font-size:13px;color:#777;text-decoration:line-through;margin-left:8px}
+.actions{display:flex;gap:8px}.actions button{flex:1}
+.details{background:#333}
+#cartPanel{position:fixed;right:0;top:0;height:100%;width:min(420px,100%);background:#1b1b1b;z-index:10;padding:25px;box-shadow:0 0 40px #000;transform:translateX(110%);transition:.3s;overflow:auto}
+#cartPanel.open{transform:translateX(0)}
+.cartHead{display:flex;justify-content:space-between;margin-bottom:25px}
+.cartItem{display:flex;justify-content:space-between;gap:10px;padding:14px 0;border-bottom:1px solid #333}
+.total{font-size:23px;font-weight:bold;margin:25px 0}
+#modal{display:none;position:fixed;inset:0;background:#000c;z-index:20;align-items:center;justify-content:center;padding:20px}
+.modalBox{background:#202020;padding:25px;border-radius:12px;width:min(480px,100%);max-height:90vh;overflow:auto}
+.modalBox input,.modalBox textarea{width:100%;padding:13px;margin:8px 0;background:#303030;border:1px solid #444;border-radius:7px;color:white}
+footer{padding:30px 5%;background:#181818;color:#999;text-align:center}
+@media(max-width:600px){.hero h1{font-size:28px}.hero{padding:30px 20px}.search{order:3;max-width:none;width:100%}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">BLACK<span>STORE</span></div>
+<input class="search" id="search" placeholder="Пошук товарів..." oninput="render()">
+<button onclick="toggleCart()">🛒 Кошик (<span id="count">0</span>)</button>
+</header>
+<nav id="categories">
+<button class="active" onclick="category('Усі')">Усі товари</button>
+<button onclick="category('Смартфони')">Смартфони</button>
+<button onclick="category('Ноутбуки')">Ноутбуки</button>
+<button onclick="category('Навушники')">Навушники</button>
+<button onclick="category('Аксесуари')">Аксесуари</button>
+<button onclick="category('Техніка')">Техніка</button>
+</nav>
+<section class="hero">
+<h1>ТЕХНІКА. ЯКІСТЬ. СТИЛЬ.</h1>
+<p>BLACK STORE — сучасний магазин електроніки та гаджетів.</p>
+<button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Перейти до покупок →</button>
+</section>
+<main id="catalog">
+<div class="heading"><h2>Популярні товари</h2><span id="resultCount"></span></div>
+<div class="products" id="products"></div>
+</main>
+<div id="cartPanel">
+<div class="cartHead"><h2>Ваш кошик</h2><button onclick="toggleCart()">✕</button></div>
+<div id="cartItems"></div>
+<div class="total" id="total">Разом: 0 ₴</div>
+<button style="width:100%" onclick="checkout()">Оформити замовлення</button>
+</div>
+<div id="modal" onclick="if(event.target===this)closeModal()">
+<div class="modalBox" id="modalContent"></div>
+</div>
+<footer>© 2026 BLACK STORE · Інтернет-магазин електроніки</footer>
+<script>
+const products=[
+['Apple iPhone 16 128GB','Смартфони',38999,'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=700'],
+['Samsung Galaxy S25','Смартфони',34999,'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=700'],
+['Xiaomi Redmi Note 14','Смартфони',8999,'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=700'],
+['Apple iPhone 15','Смартфони',29999,'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=700'],
+['MacBook Air M3','Ноутбуки',45999,'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=700'],
+['ASUS TUF Gaming F15','Ноутбуки',37999,'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=700'],
+['Lenovo IdeaPad Slim','Ноутбуки',24999,'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700'],
+['HP Pavilion 15','Ноутбуки',27999,'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=700'],
+['AirPods Pro 2','Навушники',9999,'https://images.unsplash.com/photo-1603351154351-5e2d0600bb77?w=700'],
+['Sony WH-1000XM5','Навушники',14999,'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700'],
+['JBL Tune 770NC','Навушники',3999,'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=700'],
+['Samsung Buds3 Pro','Навушники',7999,'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=700'],
+['Apple Watch Series 10','Техніка',18999,'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=700'],
+['Samsung Galaxy Watch 7','Техніка',10999,'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700'],
+['PlayStation 5 Slim','Техніка',22999,'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=700'],
+['Xbox Series X','Техніка',24999,'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=700'],
+['Logitech G502 Hero','Аксесуари',1999,'https://images.unsplash.com/photo-1527814050087-3793815479db?w=700'],
+['Razer BlackWidow V4','Аксесуари',6999,'https://images.unsplash.com/photo-1595225476474-87563907a212?w=700'],
+['Apple Magic Mouse','Аксесуари',3999,'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=700'],
+['Power Bank 20000 mAh','Аксесуари',1499,'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=700'],
+['Samsung 4K Monitor','Техніка',11999,'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700'],
+['Canon EOS Camera','Техніка',27999,'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=700'],
+['JBL Flip 6','Аксесуари',4499,'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=700'],
+['Anker Charger 65W','Аксесуари',1199,'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=700']
+].map((p,i)=>({id:i,name:p[0],cat:p[1],price:p[2],img:p[3]}));
+let selected='Усі',cart=[];
+const money=n=>n.toLocaleString('uk-UA')+' ₴';
+function category(c){selected=c;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.textContent===(c==='Усі'?'Усі товари':c)));render()}
+function render(){
+let q=document.getElementById('search').value.toLowerCase();
+let list=products.filter(p=>(selected==='Усі'||p.cat===selected)&&p.name.toLowerCase().includes(q));
+document.getElementById('resultCount').textContent='Знайдено: '+list.length;
+document.getElementById('products').innerHTML=list.map(p=>`<article class="card"><div class="photo"><img src="${p.img}" alt="${p.name}" loading="lazy"></div><div class="info"><div class="category">${p.cat}</div><h3>${p.name}</h3><div class="price">${money(p.price)}</div><div class="actions"><button onclick="add(${p.id})">У кошик</button><button class="details" onclick="detail(${p.id})">Деталі</button></div></div></article>`).join('');
+}
+function add(id){let item=cart.find(x=>x.id===id);if(item)item.qty++;else cart.push({id,qty:1});updateCart()}
+function updateCart(){
+document.getElementById('count').textContent=cart.reduce((s,x)=>s+x.qty,0);
+document.getElementById('cartItems').innerHTML=cart.length?cart.map(x=>{let p=products[x.id];return `<div class="cartItem"><div>${p.name}<br>${money(p.price)} × ${x.qty}</div><div><button onclick="change(${x.id},-1)">−</button> <button onclick="change(${x.id},1)">+</button></div></div>`}).join(''):'Кошик порожній';
+document.getElementById('total').textContent='Разом: '+money(cart.reduce((s,x)=>s+products[x.id].price*x.qty,0));
+}
+function change(id,n){let x=cart.find(x=>x.id===id);x.qty+=n;if(x.qty<=0)cart=cart.filter(a=>a.id!==id);updateCart()}
+function toggleCart(){document.getElementById('cartPanel').classList.toggle('open')}
+function detail(id){let p=products[id];document.getElementById('modalContent').innerHTML=`<button onclick="closeModal()" style="float:right">✕</button><img src="${p.img}" style="width:100%;height:200px;object-fit:contain;background:white;border-radius:8px"><p class="category">${p.cat}</p><h2>${p.name}</h2><h2 style="margin:15px 0">${money(p.price)}</h2><p style="color:#aaa;margin-bottom:20px">Товар з каталогу BLACK STORE. Уточнюйте наявність перед замовленням.</p><button onclick="add(${id});closeModal()">Додати у кошик</button>`;document.getElementById('modal').style.display='flex'}
+function closeModal(){document.getElementById('modal').style.display='none'}
+function checkout(){
+if(!cart.length){alert('Кошик порожній');return}
+document.getElementById('modalContent').innerHTML=`<button onclick="closeModal()" style="float:right">✕</button><h2>Оформлення замовлення</h2><form onsubmit="sendOrder(event)"><input id="customer" placeholder="Ваше ім'я" required><input id="phone" placeholder="Номер телефону" required><input id="city" placeholder="Місто" required><input id="branch" placeholder="Відділення Нової пошти"><textarea id="comment" placeholder="Коментар до замовлення"></textarea><button style="width:100%">Підтвердити замовлення</button></form>`;
+document.getElementById('modal').style.display='flex';
+}
+function sendOrder(e){
+e.preventDefault();
+let order={name:customer.value,phone:phone.value,city:city.value,branch:branch.value,comment:comment.value,items:cart.map(x=>({product:products[x.id].name,qty:x.qty})),total:cart.reduce((s,x)=>s+products[x.id].price*x.qty,0),date:new Date().toLocaleString('uk-UA')};
+let orders=JSON.parse(localStorage.getItem('blackstore_orders')||'[]');orders.push(order);localStorage.setItem('blackstore_orders',JSON.stringify(orders));
+alert('Дякуємо! Замовлення збережено в цьому браузері. Це тестове оформлення, магазин ще не підключений до сервера.');
+cart=[];updateCart();closeModal();toggleCart();
+}
+render();updateCart();
+</script>
+</body>
+</html>
