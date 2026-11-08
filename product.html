@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLACK STORE — Товар</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+ --bg:#090a0d;
+ --panel:#15171c;
+ --text:#f5f5f6;
+ --muted:#9297a1;
+ --accent:#dc956b;
+ --border:rgba(255,255,255,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+ min-height:100vh;
+ background:
+ radial-gradient(ellipse at 15% 10%,rgba(180,85,42,.13),transparent 35%),
+ radial-gradient(ellipse at 85% 45%,rgba(120,65,40,.09),transparent 35%),
+ var(--bg);
+ color:var(--text);
+ font-family:Arial,Helvetica,sans-serif;
+}
+button{
+ border:1px solid rgba(220,149,107,.3);
+ background:#272421;color:white;
+ padding:13px 20px;border-radius:12px;
+ cursor:pointer;font-weight:700;transition:.25s;
+}
+button:hover{background:#393027;transform:translateY(-2px)}
+header{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:20px 5%;gap:15px;flex-wrap:wrap;
+ background:#0c0d10eF;
+ border-bottom:1px solid var(--border);
+ position:sticky;top:0;z-index:5;
+ backdrop-filter:blur(20px);
+}
+.logo{font-size:26px;font-weight:900;color:white;text-decoration:none}
+.logo span{color:var(--accent)}
+a{color:inherit;text-decoration:none}
+.topbtn{background:#202126;border-color:var(--border)}
+main{max-width:1200px;margin:auto;padding:35px 5% 70px}
+.back{color:var(--accent);display:inline-block;margin-bottom:25px}
+.product{
+ display:grid;grid-template-columns:1.1fr 1fr;
+ gap:35px;align-items:start;
+ animation:appear .6s ease both;
+}
+@keyframes appear{
+ from{opacity:0;transform:translateY(20px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.gallery{
+ min-height:430px;background:linear-gradient(145deg,#1b1d22,#111216);
+ border:1px solid var(--border);border-radius:23px;
+ display:grid;place-items:center;padding:30px;
+}
+.gallery img{width:100%;height:370px;object-fit:contain}
+.info{
+ padding:28px;background:linear-gradient(145deg,#1b1d22,#121317);
+ border:1px solid var(--border);border-radius:23px;
+}
+.category{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+h1{font-size:clamp(25px,4vw,36px);line-height:1.25;margin-bottom:18px}
+.description{color:var(--muted);line-height:1.8;margin:20px 0}
+.price{font-size:34px;font-weight:900;margin:25px 0}
+.stock{color:#79c99a;font-size:14px;margin-bottom:22px}
+.stock.out{color:#e58c8c}
+.buttons{display:flex;gap:12px;flex-wrap:wrap}
+.buttons button{flex:1;min-width:150px}
+.secondary{background:#202126;border-color:var(--border)}
+.features{
+ margin-top:35px;padding:25px;
+ background:#15171c;border:1px solid var(--border);
+ border-radius:20px;
+}
+.features h2{margin-bottom:15px}
+#notice{margin-top:20px;color:var(--accent)}
+footer{text-align:center;padding:30px;color:#777;border-top:1px solid var(--border)}
+@media(max-width:750px){
+ .product{grid-template-columns:1fr;gap:18px}
+ .gallery{min-height:280px}
+ .gallery img{height:260px}
+ .info{padding:22px}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <a href="/" class="logo">BLACK<span>STORE</span></a>
+ <a href="/"><button class="topbtn">← До магазину</button></a>
+ <button class="topbtn" onclick="goCart()">🛒 Кошик (<span id="count">0</span>)</button>
+</header>
+
+<main>
+ <a href="/" class="back">← Назад до каталогу</a>
+ <div id="content">Завантажуємо товар...</div>
+ <div id="notice"></div>
+</main>
+
+<footer>© 2026 BLACK STORE · Інтернет-магазин техніки</footer>
+
+<script>
+const SUPABASE_URL="https://khpbevlmqypfqkniedcu.supabase.co";
+const SUPABASE_KEY="sb_publishable_MxvX0vg45TxzAqPJrmIWSA_8qpcbUxi";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let product=null;
+let cart=JSON.parse(localStorage.getItem("bs_cart")||"[]");
+
+const money=n=>Number(n).toLocaleString("uk-UA")+" ₴";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+function updateCount(){
+ document.getElementById("count").textContent=
+ cart.reduce((s,x)=>s+Number(x.qty||0),0);
+}
+
+function message(s){
+ document.getElementById("notice").textContent=s;
+}
+
+function goCart(){
+ window.location.href="/?cart=1";
+}
+
+function addToCart(){
+ if(!product||product.stock<=0)return;
+ const item=cart.find(x=>Number(x.id)===Number(product.id));
+ if(item){
+  if(item.qty>=product.stock){
+   message("Більше товару немає на складі");
+   return;
+  }
+  item.qty++;
+ }else{
+  cart.push({id:product.id,qty:1});
+ }
+ localStorage.setItem("bs_cart",JSON.stringify(cart));
+ updateCount();
+ message("Товар додано до кошика!");
+}
+
+function renderProduct(p){
+ const content=document.getElementById("content");
+ const available=Number(p.stock)>0;
+
+ content.innerHTML=`
+ <div class="product">
+  <div class="gallery">
+   <img src="${esc(p.image_url||"")}" alt="${esc(p.name)}"
+   onerror="this.style.display='none'">
+  </div>
+  <div class="info">
+   <div class="category">${esc(p.category)}</div>
+   <h1>${esc(p.name)}</h1>
+   <div class="price">${money(p.price)}</div>
+   <div class="stock ${available?"":"out"}">
+    ${available?"● В наявності: "+p.stock:"● Немає в наявності"}
+   </div>
+   <div class="buttons">
+    <button ${available?"":"disabled"} onclick="addToCart()">
+     Додати до кошика
+    </button>
+    <button class="secondary" onclick="window.location.href='/'">
+     Продовжити покупки
+    </button>
+   </div>
+   <div class="description">
+    ${esc(p.description||"Опис товару уточнюється")}
+   </div>
+  </div>
+ </div>
+ <div class="features">
+  <h2>Інформація про товар</h2>
+  <p class="description">
+   Категорія: ${esc(p.category)}<br>
+   Наявність: ${available?"Є на складі":"Немає на складі"}<br>
+   Магазин: BLACK STORE
+  </p>
+ </div>`;
+ document.title=esc(p.name)+" — BLACK STORE";
+}
+
+async function loadProduct(){
+ const id=new URLSearchParams(location.search).get("id");
+ if(!id||!/^\d+$/.test(id)){
+  document.getElementById("content").textContent="Товар не знайдено";
+  return;
+ }
+ const {data,error}=await db.from("products")
+  .select("*").eq("id",Number(id))
+  .eq("is_active",true).maybeSingle();
+
+ if(error||!data){
+  document.getElementById("content").textContent="Товар не знайдено";
+  return;
+ }
+ product=data;
+ renderProduct(data);
+}
+
+updateCount();
+loadProduct();
+</script>
+</body>
+</html>
