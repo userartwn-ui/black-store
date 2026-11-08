@@ -365,22 +365,6 @@ function updateCategoryShowcase(){
 
 
 
-
- document.getElementById("resultCount").textContent="Знайдено: "+list.length;
-
- const container=document.getElementById("products");
-
- container.classList.remove("products-show");
- container.innerHTML=list.length?list.map(p=>
- `<article class="card">
- <div class="photo"><img src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>
- <div class="info"><div class="category">${esc(p.category)}</div>
- <h3>${esc(p.name)}</h3><div class="price">${money(p.price)}</div>
- <div class="stock">${p.stock>0?"В наявності: "+p.stock:"Немає в наявності"}</div>
- <div class="actions"><button ${p.stock<=0?"disabled":""} onclick="addToCart(${p.id})">У кошик</button>
- <button class="secondary" onclick="details(${p.id})">Деталі</button></div></div></article>`
- ).join(""):"Товарів не знайдено";
-
 function render(){
  const q=document.getElementById("search").value.toLowerCase();
  const list=products.filter(p=>
