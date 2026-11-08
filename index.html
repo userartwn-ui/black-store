@@ -267,14 +267,36 @@ function closeDialog(){document.getElementById("overlay").style.display="none"}
 function toggleCart(){document.getElementById("cartPanel").classList.toggle("open")}
 
 async function loadProducts(){
- const {data,error}=await db.from("products")
-  .select("id,name,description,category,price,image_url,stock")
-  .eq("is_active",true).order("id");
- if(error){message("Не вдалося завантажити товари: "+error.message);return}
- products=data||[];
- renderCategories();
- updateCategoryShowcase();
- render();
+ const container = document.getElementById("products");
+ container.textContent = "Підключаємося до бази даних...";
+
+ try {
+  const {data,error}=await db
+   .from("products")
+   .select("*")
+   .order("id");
+
+  if(error){
+   console.error("SUPABASE ERROR:", error);
+   message("Помилка бази: " + error.message);
+   container.textContent = "Не вдалося завантажити товари";
+   return;
+  }
+
+  products = (data || []).filter(p => p.is_active !== false);
+
+  console.log("ЗАВАНТАЖЕНО ТОВАРІВ:", products);
+
+  renderCategories();
+  updateCategoryShowcase();
+  render();
+  updateCart();
+
+ } catch(error) {
+  console.error("LOAD ERROR:", error);
+  message("Помилка: " + error.message);
+  container.textContent = "Помилка завантаження";
+ }
 }
 
 function renderCategories(){
