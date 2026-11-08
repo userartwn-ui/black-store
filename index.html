@@ -445,14 +445,11 @@ function changeQty(id,n){
 
 
 function details(id){
- const p=products.find(p=>p.id===id);if(!p)return;
- openDialog(`<button class="secondary" onclick="closeDialog()">Закрити</button>
- <h2 style="margin-top:15px">${esc(p.name)}</h2><p class="category">${esc(p.category)}</p>
- <p>${esc(p.description||"Опис уточнюється")}</p><h2 style="margin:15px 0">${money(p.price)}</h2>
- <p class="muted">Наявність: ${p.stock}</p>
- <button onclick="addToCart(${p.id});closeDialog()">Додати до кошика</button>`);
-}
+ const p=products.find(p=>Number(p.id)===Number(id));
+ if(!p)return;
 
+ window.location.href="product.html?id="+encodeURIComponent(p.id);
+}
 function openAuth(){
  openDialog(`<h2>Особистий кабінет</h2>
  <form onsubmit="signIn(event)">
