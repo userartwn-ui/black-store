@@ -364,23 +364,7 @@ function updateCategoryShowcase(){
 
 
 
-function addToCart(id){
- const p=products.find(x=>x.id===id);if(!p||p.stock<=0)return;
- const item=cart.find(x=>x.id===id);
- if(item){if(item.qty>=p.stock){message("Більше товару немає на складі");return}item.qty++}
- else cart.push({id,qty:1});
- saveCart();message("Товар додано до кошика");
-}
-function saveCart(){localStorage.setItem("bs_cart",JSON.stringify(cart));updateCart()}
-function updateCart(){
- document.getElementById("count").textContent=cart.reduce((s,x)=>s+x.qty,0);
- document.getElementById("cartItems").innerHTML=cart.length?cart.map(x=>{
- const p=products.find(function render(){
- const q=document.getElementById("search").value.toLowerCase();
- const list=products.filter(p=>
-  (selected==="Усі"||p.category===selected)&&
-  p.name.toLowerCase().includes(q)
- );
+
 
  document.getElementById("resultCount").textContent="Знайдено: "+list.length;
 
@@ -396,6 +380,84 @@ function updateCart(){
  <div class="actions"><button ${p.stock<=0?"disabled":""} onclick="addToCart(${p.id})">У кошик</button>
  <button class="secondary" onclick="details(${p.id})">Деталі</button></div></div></article>`
  ).join(""):"Товарів не знайдено";
+
+function render(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const list=products.filter(p=>
+  (selected==="Усі"||p.category===selected)&&
+  p.name.toLowerCase().includes(q)
+ );
+
+ document.getElementById("resultCount").textContent="Знайдено: "+list.length;
+
+ const container=document.getElementById("products");
+ container.classList.remove("products-show");
+
+ container.innerHTML=list.length?list.map(p=>
+ `<article class="card">
+ <div class="photo"><img src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>
+ <div class="info"><div class="category">${esc(p.category)}</div>
+ <h3>${esc(p.name)}</h3><div class="price">${money(p.price)}</div>
+ <div class="stock">${p.stock>0?"В наявності: "+p.stock:"Немає в наявності"}</div>
+ <div class="actions"><button ${p.stock<=0?"disabled":""} onclick="addToCart(${p.id})">У кошик</button>
+ <button class="secondary" onclick="details(${p.id})">Деталі</button></div></div></article>`
+ ).join(""):"Товарів не знайдено";
+
+ void container.offsetWidth;
+ container.classList.add("products-show");
+}
+
+function addToCart(id){
+ const p=products.find(x=>x.id===id);
+ if(!p||p.stock<=0)return;
+ const item=cart.find(x=>x.id===id);
+ if(item){
+  if(item.qty>=p.stock){
+   message("Більше товару немає на складі");
+   return;
+  }
+  item.qty++;
+ }else{
+  cart.push({id,qty:1});
+ }
+ saveCart();
+ message("Товар додано до кошика");
+}
+
+function saveCart(){
+ localStorage.setItem("bs_cart",JSON.stringify(cart));
+ updateCart();
+}
+
+function updateCart(){
+ document.getElementById("count").textContent=cart.reduce((s,x)=>s+x.qty,0);
+
+ document.getElementById("cartItems").innerHTML=cart.length?cart.map(x=>{
+  const p=products.find(p=>p.id===x.id);
+  if(!p)return "";
+  return `<div class="cartitem"><div>${esc(p.name)}<br>${money(p.price)} × ${x.qty}</div>
+  <div><button onclick="changeQty(${x.id},-1)">−</button> <button onclick="changeQty(${x.id},1)">+</button></div></div>`;
+ }).join(""):"Кошик порожній";
+
+ document.getElementById("total").textContent="Разом: "+money(cart.reduce((s,x)=>{
+  const p=products.find(p=>p.id===x.id);
+  return s+(p?p.price*x.qty:0);
+ },0));
+}
+
+function changeQty(id,n){
+ const x=cart.find(x=>x.id===id);
+ const p=products.find(p=>p.id===id);
+ if(!x||!p)return;
+
+ x.qty+=n;
+ if(x.qty<=0){
+  cart=cart.filter(a=>a.id!==id);
+ }else if(x.qty>p.stock){
+  x.qty=p.stock;
+ }
+ saveCart();
+}
 
  void container.offsetWidth;
  container.classList.add("products-show");
