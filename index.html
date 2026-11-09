@@ -371,7 +371,8 @@ function updateCategoryShowcase(){
  else if(c.includes("аксесуар")||c.includes("аксессуар"))
  d={type:"",icon:"⌚",title:"Деталі мають значення",description:"Аксесуари, що доповнюють твій стиль"};
 
- banner.className="category-showcase "+d.type;
+ const wasPortalActive=banner.classList.contains("portal-active");
+banner.className="category-showcase "+d.type+(wasPortalActive?" portal-active":"");
  title.textContent=d.title;
  description.textContent=d.description;
  icon.textContent=d.icon;
