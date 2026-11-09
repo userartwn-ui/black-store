@@ -378,7 +378,7 @@ function render(){
  container.classList.remove("products-show");
 
  container.innerHTML=list.length?list.map(p=>
- `<article class="card">
+ `<article class="card" style="--i:${list.indexOf(p)}">
  <div class="photo"><img src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>
  <div class="info"><div class="category">${esc(p.category)}</div>
  <h3>${esc(p.name)}</h3><div class="price">${money(p.price)}</div>
