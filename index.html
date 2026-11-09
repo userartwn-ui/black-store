@@ -339,9 +339,10 @@ function setCategory(c){
   updateCategoryShowcase();
   render();
 
-  banner.classList.remove("portal-active");
-  container.classList.remove("portal-out");
+   container.classList.remove("portal-out");
   container.classList.add("portal-in");
+
+  banner.classList.remove("portal-active");
 
   setTimeout(()=>{
    container.classList.remove("portal-in");
