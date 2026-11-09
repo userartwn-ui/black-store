@@ -323,14 +323,32 @@ function renderCategories(){
  `<button class="${selected===c?"active":""}" onclick="setCategory('${esc(c)}')">${esc(c==="Усі"?"Усі товари":c)}</button>`
  ).join("");
 }
-
 function setCategory(c){
- selected=c;
- renderCategories();
- updateCategoryShowcase();
- render();
-}
+ if(c===selected)return;
 
+ const container=document.getElementById("products");
+ const banner=document.getElementById("categoryShowcase");
+
+ banner.classList.add("portal-active");
+ container.classList.remove("portal-in");
+ container.classList.add("portal-out");
+
+ setTimeout(()=>{
+  selected=c;
+  renderCategories();
+  updateCategoryShowcase();
+  render();
+
+  banner.classList.remove("portal-active");
+  container.classList.remove("portal-out");
+  container.classList.add("portal-in");
+
+  setTimeout(()=>{
+   container.classList.remove("portal-in");
+  },1000);
+
+ },350);
+}
 function updateCategoryShowcase(){
  const banner=document.getElementById("categoryShowcase");
  const title=document.getElementById("showcaseTitle");
